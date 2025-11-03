@@ -1,5 +1,4 @@
 # VLESS (xhttp) + 哪吒探针 
-镜像leojyenn/nz-xttp
 
 ## docker-compose.yml
 
