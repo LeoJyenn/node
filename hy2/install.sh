@@ -54,7 +54,7 @@ if [ -n "$NEZHA_SERVER" ] && [ -n "$NEZHA_KEY" ]; then
 
     cat > /home/container/nz/config.yaml << EOF
 server: $NEZHA_SERVER
-secret: $NEZHA_KEY
+client_secret: $NEZHA_KEY
 tls: $TLS_VALUE
 EOF
 
