@@ -5,15 +5,13 @@ sed -i "s/UUID/$UUID/g" /app/xy/config.json
 sed -i "s/DOMAIN/$DOMAIN/g" /app/keepalive.sh
 
 # 添加哪吒探针配置（可选）
-if [ -n "$NZ_SERVER" ] && [ -n "$NZ_CLIENT_SECRET" ]; then
-  TLS_VALUE="false"
-  if [ "$NZ_TLS" = "true" ] || [ "$NZ_TLS" = "1" ]; then
-    TLS_VALUE="true"
-  fi
+if [ -n "$NEZHA_SERVER" ] && [ -n "$NEZHA_KEY" ]; then
+  # 默认TLS为true
+  TLS_VALUE="true"
   
   cat > /app/nz/config.yaml << EOF
-server: $NZ_SERVER
-secret: $NZ_CLIENT_SECRET
+server: $NEZHA_SERVER
+secret: $NEZHA_KEY
 tls: $TLS_VALUE
 EOF
   echo "哪吒探针配置已生成"
