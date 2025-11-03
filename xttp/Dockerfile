@@ -29,9 +29,8 @@ ENV TZ=Asia/Shanghai \
     UUID=2584b733-9095-4bec-a7d5-62b473540f7a \
     DOMAIN=vevc-fml.hf.space \
     # 哪吒探针环境变量（可选）
-    NZ_SERVER= \
-    NZ_CLIENT_SECRET= \
-    NZ_TLS=false
+    NEZHA_SERVER= \
+    NEZHA_KEY=
 
 COPY entrypoint.sh /entrypoint.sh
 COPY app /app
