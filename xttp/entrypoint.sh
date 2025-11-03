@@ -11,7 +11,7 @@ if [ -n "$NEZHA_SERVER" ] && [ -n "$NEZHA_KEY" ]; then
   
   cat > /app/nz/config.yaml << EOF
 server: $NEZHA_SERVER
-secret: $NEZHA_KEY
+client_secret: $NEZHA_KEY
 tls: $TLS_VALUE
 EOF
   echo "哪吒探针配置已生成"
