@@ -21,6 +21,8 @@ services:
 
 ## 格式示例
 
+镜像leojyenn/nz-xttp
+
 ```javascript
 vless://自定义UUID@提供的域名:443?encryption=none&security=tls&fp=chrome&type=xhttp&path=%2F&mode=auto#-xhttp
 ```

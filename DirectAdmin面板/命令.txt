@@ -1,0 +1,21 @@
+cloudlinux-selector get --json --interpreter=nodejs --user=springfr
+{"available_versions": {"18.20.7": {"base_dir": "/opt/alt/alt-nodejs18", "status": "enabled"}, "19.9.0": {"base_dir": "/opt/alt/alt-nodejs19", "status": "enabled"}, 
+"20.18.3": {"base_dir": "/opt/alt/alt-nodejs20", "status": "enabled"}, "22.14.0": {"base_dir": "/opt/alt/alt-nodejs22", "status": "enabled"}}, 
+"cache_status": "ready", "default_version": null, "passenger_active": true, "result": "success", "selector_enabled": false, "timestamp": 1752542350.7987213}
+
+
+cloudlinux-selector create --json --interpreter=nodejs --user=springfr --app-root=/home/springfr/domains/sv.swing.xx.kg/public_html --app-uri=/ --version=22.14.0 --app-mode=Development --startup-file=app.js
+{"result": "Selector is disabled", "timestamp": 1752543412.177095}
+
+
+cd domains/sv.swing.xx.kg/public_html
+/opt/alt/alt-nodejs22/root/bin/npm i
+/opt/alt/alt-nodejs22/root/bin/node app.js
+nohup /opt/alt/alt-nodejs22/root/bin/node app.js >> /dev/null 2>&1 &
+
+For Cron Job:
+nohup /opt/alt/alt-nodejs22/root/bin/node /home/springfr/domains/sv.swing.xx.kg/public_html/app.js >> /dev/null 2>&1 &
+
+
+ls /home/springfr/.npm/_logs
+rm -f /home/springfr/.npm/_logs/*.log
