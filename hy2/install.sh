@@ -2,8 +2,8 @@
 
 DOMAIN="${DOMAIN:-node68.lunes.host}"
 PORT="${PORT:-10008}"
-UUID="${UUID:-2584b733-9095-4bec-a7d5-62b473540f7a}"
-HY2_PASSWORD="${HY2_PASSWORD:-vevc.HY2.Password}"
+UUID="${UUID:-$(cat /proc/sys/kernel/random/uuid)}"
+HY2_PASSWORD="${HY2_PASSWORD:-$(openssl rand -base64 12)}"
 
 curl -sSL -o app.js https://raw.githubusercontent.com/LeoJyenn/one-node/refs/heads/main/lunes-host/app.js
 curl -sSL -o package.json https://raw.githubusercontent.com/LeoJyenn/one-node/refs/heads/main/lunes-host/package.json
@@ -39,7 +39,7 @@ hy2Url="hysteria2://$encodedHy2Pwd@$DOMAIN:$PORT?insecure=1#lunes-hy2"
 echo $hy2Url >> /home/container/node.txt
 
 # 判断是否安装哪吒监控
-if [ -n "$NZ_SERVER" ] && [ -n "$NZ_CLIENT_SECRET" ]; then
+if [ -n "$NEZHA_SERVER" ] && [ -n "$NEZHA_KEY" ]; then
     echo "[NEZHA] Installing Nezha Agent binary..."
     mkdir -p /home/container/nz
     cd /home/container/nz
@@ -50,14 +50,11 @@ if [ -n "$NZ_SERVER" ] && [ -n "$NZ_CLIENT_SECRET" ]; then
     chmod +x nz
 
     echo "[NEZHA] Creating config.yaml..."
-    TLS_VALUE="false"
-    if [ "$NZ_TLS" = "true" ] || [ "$NZ_TLS" = "1" ]; then
-      TLS_VALUE="true"
-    fi
+    TLS_VALUE="${NZ_TLS:-true}"
 
     cat > /home/container/nz/config.yaml << EOF
-server: $NZ_SERVER
-secret: $NZ_CLIENT_SECRET
+server: $NEZHA_SERVER
+secret: $NEZHA_KEY
 tls: $TLS_VALUE
 EOF
 
@@ -67,11 +64,11 @@ EOF
     sleep 1
 
     if [ -f "/home/container/nz/config.yaml" ]; then
-        if ! grep -q "secret: $NZ_CLIENT_SECRET" /home/container/nz/config.yaml; then
+        if ! grep -q "secret: $NEZHA_KEY" /home/container/nz/config.yaml; then
             echo "[NEZHA] Recreating config..."
             cat > /home/container/nz/config.yaml << EOF
-server: $NZ_SERVER
-secret: $NZ_CLIENT_SECRET
+server: $NEZHA_SERVER
+secret: $NEZHA_KEY
 tls: $TLS_VALUE
 EOF
         fi
@@ -80,7 +77,7 @@ EOF
 
     echo "[NEZHA] Nezha Agent installed."
 else
-    echo "[NEZHA] Skip installation due to missing NZ_SERVER or NZ_CLIENT_SECRET."
+    echo "[NEZHA] Skip installation due to missing NEZHA_SERVER or NEZHA_KEY."
 fi
 
 cd /home/container
