@@ -1,4 +1,6 @@
 # VLESS (xhttp) + 哪吒探针 
+镜像leojyenn/nz-xttp
+
 ## docker-compose.yml
 
 
@@ -13,15 +15,12 @@ services:
     environment:
       - UUID=自定义UUID
       - DOMAIN=提供的域名
-      - NZ_SERVER=哪吒v1地址
-      - NZ_CLIENT_SECRET=哪吒密钥
-      - NZ_TLS=true
+      - NEZHA_SERVER=哪吒v1地址
+      - NEZHA_KEY=哪吒密钥
     restart: always
 ```
 
 ## 格式示例
-
-镜像leojyenn/nz-xttp
 
 ```javascript
 vless://自定义UUID@提供的域名:443?encryption=none&security=tls&fp=chrome&type=xhttp&path=%2F&mode=auto#-xhttp
