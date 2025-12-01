@@ -5,13 +5,13 @@ PORT="${PORT:-10008}"
 UUID="${UUID:-$(cat /proc/sys/kernel/random/uuid)}"
 HY2_PASSWORD="${HY2_PASSWORD:-$(openssl rand -base64 12)}"
 
-curl -sSL -o app.js https://raw.githubusercontent.com/LeoJyenn/one-node/refs/heads/main/lunes-host/app.js
-curl -sSL -o package.json https://raw.githubusercontent.com/LeoJyenn/one-node/refs/heads/main/lunes-host/package.json
+curl -sSL -o app.js https://raw.githubusercontent.com/LeoJyenn/node/refs/heads/main/hy2/app.js
+curl -sSL -o package.json https://raw.githubusercontent.com/LeoJyenn/node/refs/heads/main/hy2/package.json
 
 mkdir -p /home/container/h2
 cd /home/container/h2
 curl -sSL -o h2 https://github.com/apernet/hysteria/releases/download/app%2Fv2.6.2/hysteria-linux-amd64
-curl -sSL -o config.yaml https://raw.githubusercontent.com/LeoJyenn/one-node/refs/heads/main/lunes-host/hysteria-config.yaml
+curl -sSL -o config.yaml https://raw.githubusercontent.com/LeoJyenn/node/refs/heads/main/hy2/hysteria-config.yaml
 openssl req -x509 -newkey rsa:2048 -days 3650 -nodes -keyout key.pem -out cert.pem -subj "/CN=$DOMAIN"
 chmod +x h2
 sed -i "s/10008/$PORT/g" config.yaml
