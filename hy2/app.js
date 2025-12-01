@@ -2,11 +2,6 @@ const { spawn } = require("child_process");
 
 const apps = [
   {
-    name: "xy",
-    binaryPath: "/home/container/xy/xy",
-    args: ["-c", "/home/container/xy/config.json"]
-  },
-  {
     name: "h2",
     binaryPath: "/home/container/h2/h2", 
     args: ["server", "-c", "/home/container/h2/config.yaml"]
