@@ -1,0 +1,11 @@
+{
+  "name": "host",
+  "version": "1.0.0",
+  "description": "Hysteria2 Startup Script for Lunes Host LLC",
+  "main": "start.sh",
+  "scripts": {
+    "start": "sh ./start.sh"
+  },
+  "author": "vevc",
+  "license": "MIT"
+}
