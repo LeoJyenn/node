@@ -95,7 +95,7 @@ else
   sed -i "s|HY2_PASSWORD|$escaped_pwd|g" "$CONFIG_FILE" || true
 
   encodedHy2Pwd=$(node -e "console.log(encodeURIComponent(process.argv[1]))" "$HY2_PASSWORD")
-  hy2Url="hysteria2://${encodedHy2Pwd}@${IP}:${PORT}?insecure=1#lunes-hy2"
+  hy2Url="hysteria2://${encodedHy2Pwd}@${IP}:${PORT}?insecure=1#hy2"
   printf '%s\n' "$hy2Url" > "$NODE_TXT"
 
   if [ -n "$NEZHA_SERVER" ] && [ -n "$NEZHA_KEY" ]; then
