@@ -7,3 +7,12 @@ tls:
 auth:
   type: password
   password: 'HY2_PASSWORD'
+
+dns:
+  - 1.1.1.1
+  - 8.8.8.8
+  - 9.9.9.9
+
+quic:
+  init_stream_window: 524288
+  max_idle_timeout: 30s
