@@ -8,13 +8,10 @@ auth:
   type: password
   password: "HY2_PASSWORD"
 
-resolver:
-  type: udp
-  addr: "1.1.1.1:53"
-
-fallback_resolvers:
-  - "8.8.8.8:53"
-  - "9.9.9.9:53"
+dns:
+  - 1.1.1.1
+  - 8.8.8.8
+  - 9.9.9.9
 
 quic:
   init_stream_window: 524288
