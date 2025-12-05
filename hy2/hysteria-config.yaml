@@ -8,7 +8,10 @@ auth:
   type: password
   password: "HY2_PASSWORD"
 
-masquerade: https://www.bing.com
+masquerade:
+  type: proxy
+  proxy:
+    url: https://www.bing.com/
 
 dns:
   - 1.1.1.1
