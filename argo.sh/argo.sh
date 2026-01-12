@@ -74,9 +74,7 @@ install_tunnel() {
     echo -e "${Y}[1/3] 配置参数${E}"
     read -p "请输入 Cloudflare Token: " cf_token
     
-    # === 自动提取 Token 逻辑 (兼容 Alpine/GNU awk) ===
-    # 无论粘贴的是 "cloudflared.exe service install <TOKEN>" 还是纯 TOKEN
-    # 亦或是前后带空格，都会自动提取最后一段纯净 Token
+    # === 自动提取 Token 逻辑 ===
     cf_token=$(echo "$cf_token" | awk '{print $NF}')
     
     if [ -z "$cf_token" ]; then echo -e "${R}必须输入 Token${E}"; exit; fi
@@ -209,6 +207,8 @@ EOF
 
     echo -e "${G}成功! 服务已安装。${E}"
     
+    vless_link="vless://$uuid@$cf_domain:443?encryption=none&security=tls&type=ws&host=$cf_domain&sni=$cf_domain&path=%2f$urlpath#Argo_VLESS"
+
     # 生成节点信息文件
     cat > /opt/argotunnel/v2ray.txt <<EOF
 ======================================================
@@ -217,11 +217,12 @@ EOF
 域名 (Domain):   $cf_domain
 UUID:           $uuid
 路径 (Path):     /$urlpath
+SNI:            $cf_domain
 端口 (Port):     443
 安全 (Security): TLS
 ------------------------------------------------------
-VLESS 链接 (复制导入):
-vless://$uuid@$cf_domain:443?encryption=none&security=tls&type=ws&host=$cf_domain&path=%2f$urlpath#Argo_VLESS
+VLESS 链接:
+$vless_link
 ------------------------------------------------------
 注意: 请确保在 Cloudflare Zero Trust 后台 (Public Hostname)
 已将该域名指向 http://localhost:$local_port
