@@ -48,10 +48,13 @@ fi
 
 install_dependencies() {
     $update_cmd
-    $pkg_mgr curl unzip
+    # Alpine 需要额外安装 bash 才能运行管理脚本
     if [ $is_alpine -eq 1 ]; then
-        $pkg_mgr libc6-compat ca-certificates
+        $pkg_mgr bash curl unzip libc6-compat ca-certificates
+    else
+        $pkg_mgr curl unzip
     fi
+    
     if [ $is_alpine -eq 0 ] && [ -z "$(command -v systemctl)" ]; then
         $pkg_mgr systemd
     fi
