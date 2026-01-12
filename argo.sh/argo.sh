@@ -207,7 +207,7 @@ EOF
 
     echo -e "${G}成功! 服务已安装。${E}"
     
-    vless_link="vless://$uuid@$cf_domain:443?encryption=none&security=tls&type=ws&host=$cf_domain&sni=$cf_domain&path=%2f$urlpath#Argo_VLESS"
+    vless_link="vless://$uuid@saas.sin.fan:443?encryption=none&security=tls&type=ws&host=$cf_domain&sni=$cf_domain&path=%2f$urlpath#Argo_VLESS"
 
     # 生成节点信息文件
     cat > /opt/argotunnel/v2ray.txt <<EOF
