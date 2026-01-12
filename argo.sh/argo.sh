@@ -1,16 +1,19 @@
 #!/bin/bash
 
+# 定义颜色
 R='\033[0;31m'
 G='\033[0;32m'
 Y='\033[0;33m'
 B='\033[0;34m'
 E='\033[0m'
 
+# 检查 Root 权限
 if [[ $EUID -ne 0 ]]; then
-    echo -e "${R}Error: This script must be run as root!${E}"
+    echo -e "${R}错误: 此脚本必须以 root 身份运行!${E}"
     exit 1
 fi
 
+# 系统检测
 release_check=$(grep -i PRETTY_NAME /etc/os-release 2>/dev/null)
 is_alpine=0
 
@@ -37,7 +40,7 @@ elif [[ -f /usr/bin/yum ]]; then
     svc_restart="systemctl restart"
     svc_stop="systemctl stop"
 else
-    echo -e "${R}OS not fully supported, trying default apt...${E}"
+    echo -e "${R}系统未完全适配，尝试使用默认 apt...${E}"
     pkg_mgr="apt -y install"
     update_cmd="apt update"
     svc_start="systemctl start"
@@ -46,6 +49,7 @@ else
     svc_stop="systemctl stop"
 fi
 
+# 安装依赖
 install_dependencies() {
     $update_cmd
     # Alpine 需要额外安装 bash 才能运行管理脚本
@@ -60,23 +64,24 @@ install_dependencies() {
     fi
 }
 
+# 安装主逻辑
 install_tunnel() {
     clear
     echo -e "${B}======================================================${E}"
     echo -e "${G}          Cloudflare Argo Tunnel + Xray VLESS         ${E}"
     echo -e "${B}======================================================${E}"
     
-    echo -e "${Y}[1/3] Configuration${E}"
-    read -p "Token: " cf_token
-    if [ -z "$cf_token" ]; then echo -e "${R}Token required${E}"; exit; fi
+    echo -e "${Y}[1/3] 配置参数${E}"
+    read -p "请输入 Cloudflare Token: " cf_token
+    if [ -z "$cf_token" ]; then echo -e "${R}必须输入 Token${E}"; exit; fi
 
-    read -p "Domain (e.g., vpn.example.com): " cf_domain
-    if [ -z "$cf_domain" ]; then echo -e "${R}Domain required${E}"; exit; fi
+    read -p "请输入绑定域名 (例如 vpn.example.com): " cf_domain
+    if [ -z "$cf_domain" ]; then echo -e "${R}必须输入域名${E}"; exit; fi
 
-    read -p "Local Port (1000-65535): " local_port
-    if [ -z "$local_port" ]; then echo -e "${R}Port required${E}"; exit; fi
+    read -p "请输入本地端口 (1000-65535): " local_port
+    if [ -z "$local_port" ]; then echo -e "${R}必须输入端口${E}"; exit; fi
 
-    echo -e "\n${Y}[2/3] Installing Core Components...${E}"
+    echo -e "\n${Y}[2/3] 正在安装核心组件...${E}"
     
     mkdir -p /opt/argotunnel/
     rm -rf /opt/argotunnel/xray /opt/argotunnel/cloudflared-linux /opt/argotunnel/*.zip
@@ -100,7 +105,7 @@ install_tunnel() {
             cf_url="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm"
             ;;
         *)
-            echo -e "${R}Unsupported architecture: $arch${E}"
+            echo -e "${R}不支持的架构: $arch${E}"
             exit 1
             ;;
     esac
@@ -116,6 +121,7 @@ install_tunnel() {
     uuid=$(cat /proc/sys/kernel/random/uuid)
     urlpath=$(echo $uuid | cut -d- -f1)
 
+    # 写入 Xray 配置
     cat > /opt/argotunnel/config.json <<EOF
 {
     "inbounds": [{
@@ -135,9 +141,10 @@ install_tunnel() {
 }
 EOF
 
-    echo -e "\n${Y}[3/3] Configuring Services...${E}"
+    echo -e "\n${Y}[3/3] 正在配置服务...${E}"
 
     if [ $is_alpine -eq 1 ]; then
+        # Alpine OpenRC 配置
         cat > /etc/init.d/cloudflared <<EOF
 #!/sbin/openrc-run
 description="Cloudflare Tunnel"
@@ -160,6 +167,7 @@ EOF
         $svc_start cloudflared start
         $svc_start xray start
     else
+        # Systemd 配置
         cat > /lib/systemd/system/cloudflared.service <<EOF
 [Unit]
 Description=Cloudflare Tunnel
@@ -193,30 +201,32 @@ EOF
         $svc_start xray.service
     fi
 
-    echo -e "${G}Success! Service Installed.${E}"
+    echo -e "${G}成功! 服务已安装。${E}"
     
+    # 生成节点信息文件
     cat > /opt/argotunnel/v2ray.txt <<EOF
 ======================================================
-      Xray VLESS Configuration Info
+           Xray VLESS 配置信息
 ======================================================
-Domain:   $cf_domain
-UUID:     $uuid
-Path:     /$urlpath
-Port:     443
-Security: TLS
+域名 (Domain):   $cf_domain
+UUID:           $uuid
+路径 (Path):     /$urlpath
+端口 (Port):     443
+安全 (Security): TLS
 ------------------------------------------------------
-VLESS Link:
+VLESS 链接 (复制导入):
 vless://$uuid@$cf_domain:443?encryption=none&security=tls&type=ws&host=$cf_domain&path=%2f$urlpath#Argo_VLESS
 ------------------------------------------------------
-NOTE: Ensure Public Hostname in CF Dashboard points to
-http://localhost:$local_port
+注意: 请确保在 Cloudflare Zero Trust 后台 (Public Hostname)
+已将该域名指向 http://localhost:$local_port
 ======================================================
 EOF
 
     create_manager
-    echo -e "Command: ${G}argo${E}"
+    echo -e "管理命令: ${G}argo${E}"
 }
 
+# 创建管理脚本
 create_manager() {
     cat > /opt/argotunnel/argotunnel.sh <<EOF
 #!/bin/bash
@@ -225,13 +235,13 @@ G='\033[0;32m'
 Y='\033[0;33m'
 E='\033[0m'
 clear
-echo -e "\${G}=== Tunnel Manager (argo) ===\${E}"
-echo "1. Restart Services"
-echo "2. Stop Services"
-echo "3. Show Config"
-echo "4. Uninstall"
-echo "0. Exit"
-read -p "Select: " menu
+echo -e "\${G}=== 隧道管理菜单 (argo) ===\${E}"
+echo "1. 重启服务"
+echo "2. 停止服务"
+echo "3. 查看配置/链接"
+echo "4. 卸载服务"
+echo "0. 退出"
+read -p "请选择: " menu
 case \$menu in
     1)
         if [ $is_alpine -eq 1 ]; then
@@ -240,7 +250,7 @@ case \$menu in
         else
             systemctl restart cloudflared xray
         fi
-        echo -e "\${G}Restarted.\${E}"
+        echo -e "\${G}已重启。\${E}"
         ;;
     2)
         if [ $is_alpine -eq 1 ]; then
@@ -249,7 +259,7 @@ case \$menu in
         else
             systemctl stop cloudflared xray
         fi
-        echo -e "\${R}Stopped.\${E}"
+        echo -e "\${R}已停止。\${E}"
         ;;
     3)
         clear
@@ -270,7 +280,7 @@ case \$menu in
             systemctl daemon-reload
         fi
         rm -rf /opt/argotunnel /usr/bin/argo
-        echo -e "\${G}Uninstalled.\${E}"
+        echo -e "\${G}已卸载。\${E}"
         exit
         ;;
     0) exit ;;
@@ -280,6 +290,7 @@ EOF
     ln -sf /opt/argotunnel/argotunnel.sh /usr/bin/argo
 }
 
+# 卸载逻辑
 uninstall_service() {
     if [ $is_alpine -eq 1 ]; then
         rc-service cloudflared stop 2>/dev/null
@@ -294,17 +305,18 @@ uninstall_service() {
         systemctl daemon-reload
     fi
     rm -rf /opt/argotunnel /usr/bin/argo
-    echo -e "${G}System Cleaned.${E}"
+    echo -e "${G}系统已清理。${E}"
 }
 
+# 主菜单
 clear
 echo -e "${B}--------------------------------${E}"
-echo -e "${G}   Argo Tunnel OneKey Manager   ${E}"
+echo -e "${G}   Argo Tunnel 一键管理脚本   ${E}"
 echo -e "${B}--------------------------------${E}"
-echo -e "1. Install"
-echo -e "2. Uninstall"
-echo -e "0. Exit"
-read -p "Select: " main_opt
+echo -e "1. 安装服务"
+echo -e "2. 卸载服务"
+echo -e "0. 退出"
+read -p "请选择: " main_opt
 
 case $main_opt in
     1)
