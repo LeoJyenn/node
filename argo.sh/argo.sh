@@ -73,6 +73,12 @@ install_tunnel() {
     
     echo -e "${Y}[1/3] 配置参数${E}"
     read -p "请输入 Cloudflare Token: " cf_token
+    
+    # === 自动提取 Token 逻辑 (兼容 Alpine/GNU awk) ===
+    # 无论粘贴的是 "cloudflared.exe service install <TOKEN>" 还是纯 TOKEN
+    # 亦或是前后带空格，都会自动提取最后一段纯净 Token
+    cf_token=$(echo "$cf_token" | awk '{print $NF}')
+    
     if [ -z "$cf_token" ]; then echo -e "${R}必须输入 Token${E}"; exit; fi
 
     read -p "请输入绑定域名 (例如 vpn.example.com): " cf_domain
