@@ -10,10 +10,6 @@ nodejs-argo是一个强大的Argo隧道部署工具，专为PaaS平台和游戏�
 
 镜像leojyenn/nz-argo
 
-链接示例
-
-vless://UUID@隧道域名:443?encryption=none&security=tls&sni=abc.abc.us.kg&fp=firefox&type=ws&host=abc.abc.us.kg&path=%2Fvless-argo%3Fed%3D2560#US-Railway
-
 ---
 
 Telegram交流反馈群组：https://t.me/eooceu
@@ -53,6 +49,11 @@ Telegram交流反馈群组：https://t.me/eooceu
 | NAME | 否 | Vls | 节点名称前缀 |
 | FILE_PATH | 否 | ./tmp | 运行目录 |
 | SUB_PATH | 否 | sub | 订阅路径 |
+
+## 🚀 启动命令
+```bash
+bash start.sh
+```
 
 ## 🌐 订阅地址
 
