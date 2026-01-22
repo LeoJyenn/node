@@ -459,7 +459,7 @@ _get_hysteria_link_params() {
     HY_PORT=$(grep -E '^\s*listen:\s*:([0-9]+)' "$HYSTERIA_CONFIG_FILE" | sed -E 's/^\s*listen:\s*://' || echo "")
     HY_PASSWORD=$(grep 'password:' "$HYSTERIA_CONFIG_FILE" | head -n 1 | sed -e 's/^.*password:[[:space:]]*//' -e 's/#.*//' -e 's/[[:space:]]*$//' -e 's/["'\''']//g' || echo "")
     if grep -q '^\s*acme:' "$HYSTERIA_CONFIG_FILE"; then
-        DOMAIN_FROM_CONFIG=$(grep -A 1 '^\s*domains:' "$HYSTERIA_CONFIG_FILE" | grep '^\s*-\s*' | sed -e 's/^\s*-\s*//' -e 's/#.*//' -e 's/[ \t]*$//' -e 's/^["'\'']// -e 's/["'\'']$//')
+        DOMAIN_FROM_CONFIG=$(grep -A 1 '^\s*domains:' "$HYSTERIA_CONFIG_FILE" | grep '^\s*-\s*' | sed -e 's/^\s*-\s*//' -e 's/#.*//' -e 's/[ \t]*$//' -e "s/^[\"']//" -e "s/[\"']$//")
         if [ -z "$DOMAIN_FROM_CONFIG" ]; then
             _log_error "无法从 Hysteria 配置解析 ACME 域名。"
             return 1
@@ -469,7 +469,7 @@ _get_hysteria_link_params() {
         HY_LINK_INSECURE="0"
         HY_SNI_VALUE="$DOMAIN_FROM_CONFIG"
     elif grep -q '^\s*tls:' "$HYSTERIA_CONFIG_FILE"; then
-        CERT_PATH_FROM_CONFIG=$(grep '^\s*cert:' "$HYSTERIA_CONFIG_FILE" | head -n 1 | sed -e 's/^\s*cert:[[:space:]]*//' -e 's/#.*//' -e 's/[[:space:]]*$//' -e 's/^["'\'']// -e 's/["'\'']$//' || echo "")
+        CERT_PATH_FROM_CONFIG=$(grep '^\s*cert:' "$HYSTERIA_CONFIG_FILE" | head -n 1 | sed -e 's/^\s*cert:[[:space:]]*//' -e 's/#.*//' -e 's/[[:space:]]*$//' -e "s/^[\"']//" -e "s/[\"']$//" || echo "")
         if [ -z "$CERT_PATH_FROM_CONFIG" ]; then
             _log_error "无法从 Hysteria 配置解析证书路径。"
             return 1
