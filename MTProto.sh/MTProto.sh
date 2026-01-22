@@ -5,6 +5,7 @@ SCRIPT_COMMAND_NAME="mtp"
 SCRIPT_FILE_BASENAME="MTProto.sh"
 SCRIPT_VERSION="2.0.0"
 SCRIPT_DATE="2026-01-22"
+SCRIPT_DOWNLOAD_URL="https://raw.githubusercontent.com/LeoJyenn/node/main/MTProto.sh/MTProto.sh"
 
 # MTProto (mtg) Paths & Services
 MTG_INSTALL_PATH="/usr/local/bin/mtg"
@@ -234,18 +235,49 @@ _setup_command() {
     local installed_script_path="/usr/local/bin/${SCRIPT_COMMAND_NAME}"
     local script_path
     script_path=$(_get_script_path)
-    if [ ! -f "$script_path" ]; then
-        _log_error "无法定位脚本路径，跳过命令安装。"
+    _log_info "安装/更新 '${SCRIPT_COMMAND_NAME}' 命令到 ${installed_script_path}..."
+    if [ -f "$script_path" ]; then
+        if cp "$script_path" "$installed_script_path"; then
+            chmod +x "$installed_script_path"
+            _log_success "'${SCRIPT_COMMAND_NAME}' 命令已可用。"
+            return 0
+        fi
+        _log_warning "复制脚本失败，尝试从远程下载..."
+    else
+        _log_warning "无法定位脚本路径，尝试从远程下载..."
+    fi
+
+    if [ -z "$SCRIPT_DOWNLOAD_URL" ]; then
+        _log_error "未设置脚本下载地址，无法安装命令。"
         return 1
     fi
-    _log_info "安装/更新 '${SCRIPT_COMMAND_NAME}' 命令到 ${installed_script_path}..."
-    if cp "$script_path" "$installed_script_path"; then
+
+    local download_content
+    if command -v curl >/dev/null 2>&1; then
+        download_content=$(curl -fsSL "$SCRIPT_DOWNLOAD_URL" 2>/dev/null)
+    elif command -v wget >/dev/null 2>&1; then
+        download_content=$(wget -qO- "$SCRIPT_DOWNLOAD_URL" 2>/dev/null)
+    else
+        _log_error "curl 或 wget 不可用，无法下载脚本。"
+        return 1
+    fi
+
+    if [ -z "$download_content" ]; then
+        _log_error "脚本下载失败。"
+        return 1
+    fi
+    if ! echo "$download_content" | head -n 1 | grep -q "^#!/bin/bash"; then
+        _log_error "下载内容不是有效脚本，安装中止。"
+        return 1
+    fi
+
+    if echo "$download_content" >"$installed_script_path"; then
         chmod +x "$installed_script_path"
         _log_success "'${SCRIPT_COMMAND_NAME}' 命令已可用。"
-    else
-        _log_error "安装 '${SCRIPT_COMMAND_NAME}' 命令失败。"
-        return 1
+        return 0
     fi
+    _log_error "写入 '${SCRIPT_COMMAND_NAME}' 命令失败。"
+    return 1
 }
 
 _is_mtg_installed() {
