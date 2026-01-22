@@ -457,7 +457,7 @@ _get_hysteria_link_params() {
     fi
     _log_debug "解析 Hysteria 配置生成订阅链接..."
     HY_PORT=$(grep -E '^\s*listen:\s*:([0-9]+)' "$HYSTERIA_CONFIG_FILE" | sed -E 's/^\s*listen:\s*://' || echo "")
-    HY_PASSWORD=$(grep 'password:' "$HYSTERIA_CONFIG_FILE" | head -n 1 | sed -e 's/^.*password:[[:space:]]*//' -e 's/#.*//' -e 's/[[:space:]]*$//' -e 's/["'\''']//g' || echo "")
+    HY_PASSWORD=$(grep 'password:' "$HYSTERIA_CONFIG_FILE" | head -n 1 | sed -e 's/^.*password:[[:space:]]*//' -e 's/#.*//' -e 's/[[:space:]]*$//' -e "s/[\"']//g" || echo "")
     if grep -q '^\s*acme:' "$HYSTERIA_CONFIG_FILE"; then
         DOMAIN_FROM_CONFIG=$(grep -A 1 '^\s*domains:' "$HYSTERIA_CONFIG_FILE" | grep '^\s*-\s*' | sed -e 's/^\s*-\s*//' -e 's/#.*//' -e 's/[ \t]*$//' -e "s/^[\"']//" -e "s/[\"']$//")
         if [ -z "$DOMAIN_FROM_CONFIG" ]; then
