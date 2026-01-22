@@ -861,7 +861,19 @@ _do_uninstall_hysteria() {
     _log_debug "移除 Hysteria 旧版变量文件 (如果存在): $HYSTERIA_INSTALL_VARS_FILE"
     rm -f "$HYSTERIA_INSTALL_VARS_FILE"
 
+    _log_debug "移除 ${SCRIPT_COMMAND_NAME} 命令..."
+    rm -f "/usr/local/bin/${SCRIPT_COMMAND_NAME}"
+    local script_path
+    script_path=$(_get_script_path)
+    if [ -n "$script_path" ] && [ -f "$script_path" ] && [ "$script_path" != "/usr/local/bin/${SCRIPT_COMMAND_NAME}" ]; then
+        _log_debug "移除脚本文件: $script_path"
+        rm -f "$script_path"
+    else
+        _log_warning "未定位脚本路径或脚本已在系统命令路径中。"
+    fi
+
     _log_success "Hysteria 卸载完成。"
+    exit 0
 }
 
 _show_menu() {

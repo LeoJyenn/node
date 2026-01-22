@@ -575,6 +575,29 @@ _get_mtg_link_info() {
         MTG_LINK_VAR=$(echo "$mtg_access_json" | grep -o '"tg_url":"[^"]*"' | head -n 1 | sed -e 's/"tg_url":"//' -e 's/"//g' -e 's/\\//g')
     fi
     if [ -z "$MTG_LINK_VAR" ]; then
+        local mtg_secret_hex mtg_secret_base64 mtg_secret_val mtg_port_val server_ip
+        mtg_secret_hex=$(echo "$mtg_access_json" | tr -d '\n\r ' | grep -o '"hex":"[^"]*"' | head -n 1 | sed -e 's/"hex":"//' -e 's/"//')
+        mtg_secret_base64=$(echo "$mtg_access_json" | tr -d '\n\r ' | grep -o '"base64":"[^"]*"' | head -n 1 | sed -e 's/"base64":"//' -e 's/"//')
+        if [ -n "$mtg_secret_hex" ]; then
+            mtg_secret_val="$mtg_secret_hex"
+        else
+            mtg_secret_val="$mtg_secret_base64"
+        fi
+
+        if [ -f "$MTG_VARS_FILE" ]; then
+            mtg_port_val=$(grep '^MTG_PORT=' "$MTG_VARS_FILE" | cut -d"'" -f2)
+        fi
+        if [ -z "$mtg_port_val" ]; then
+            mtg_port_val=$(grep '^bind-to' "$MTG_CONFIG_FILE" | head -n 1 | sed -n 's/.*:\([0-9]\+\).*/\1/p')
+        fi
+        server_ip=$(_get_server_address | tr -d '[]')
+
+        if [ -n "$server_ip" ] && [ -n "$mtg_port_val" ] && [ -n "$mtg_secret_val" ]; then
+            MTG_LINK_VAR="tg://proxy?server=${server_ip}&port=${mtg_port_val}&secret=${mtg_secret_val}"
+            _log_debug "使用 secret 构造 MTG 链接: $MTG_LINK_VAR"
+            return 0
+        fi
+
         _log_error "无法从 'mtg access' 输出中解析 tg_url。"
         return 1
     fi
@@ -695,7 +718,18 @@ _do_uninstall_mtg() {
     rm -f "$LOG_FILE_MTG_OUT" "$LOG_FILE_MTG_ERR"
     _log_debug "移除 MTG 变量文件: $MTG_VARS_FILE"
     rm -f "$MTG_VARS_FILE"
+    _log_debug "移除 ${SCRIPT_COMMAND_NAME} 命令..."
+    rm -f "/usr/local/bin/${SCRIPT_COMMAND_NAME}"
+    local script_path
+    script_path=$(_get_script_path)
+    if [ -n "$script_path" ] && [ -f "$script_path" ] && [ "$script_path" != "/usr/local/bin/${SCRIPT_COMMAND_NAME}" ]; then
+        _log_debug "移除脚本文件: $script_path"
+        rm -f "$script_path"
+    else
+        _log_warning "未定位脚本路径或脚本已在系统命令路径中。"
+    fi
     _log_success "MTProto 卸载完成。"
+    exit 0
 }
 
 _show_menu() {
