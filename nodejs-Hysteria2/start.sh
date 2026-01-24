@@ -44,7 +44,7 @@ else
   echo "Running first-time install steps..."
 
   if [ ! -f "/home/container/package.json" ]; then
-    curl -sSL -o /home/container/package.json "https://raw.githubusercontent.com/LeoJyenn/node/refs/heads/main/hy2/package.json" || { echo "Failed to download package.json"; exit 1; }
+    curl -sSL -o /home/container/package.json "https://raw.githubusercontent.com/LeoJyenn/node/main/nodejs-Hysteria2/package.json" || { echo "Failed to download package.json"; exit 1; }
   else
     echo "package.json already exists, skipping download."
   fi
@@ -61,7 +61,7 @@ else
   if [ -f "$CONFIG_FILE" ]; then
     echo "Hysteria config.yaml already exists. Skipping download."
   else
-    curl -sSL -o "$CONFIG_FILE" "https://raw.githubusercontent.com/LeoJyenn/node/refs/heads/main/hy2/hysteria-config.yaml" || { echo "Failed to download config.yaml"; exit 1; }
+    curl -sSL -o "$CONFIG_FILE" "https://raw.githubusercontent.com/LeoJyenn/node/main/nodejs-Hysteria2/hysteria-config.yaml" || { echo "Failed to download config.yaml"; exit 1; }
     echo "Config file downloaded."
   fi
 
